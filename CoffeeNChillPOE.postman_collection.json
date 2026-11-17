@@ -1,0 +1,622 @@
+{
+  "info": {
+    "_postman_id": "22abdcb0-f044-467e-b7b5-794a8f9b9560",
+    "name": "CoffeeNChillPOE",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "57931139",
+    "_collection_link": "https://go.postman.co/collection/57931139-22abdcb0-f044-467e-b7b5-794a8f9b9560?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Menu Items",
+      "item": [
+        {
+          "name": "Negative Tests",
+          "item": [
+            {
+              "name": "Create Menu Item - Invalid Price",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 400\", function () {\r\npm.response.to.have.status(400);\r\n});\r\n\r\npm.test(\"Error message is returned\", function () {\r\nconst jsonData = pm.response.json();\r\npm.expect(jsonData).to.have.property(\"error\");\r\n});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n\"category\": \"Coffee\",\r\n\"sku\": \"BAD001\",\r\n\"name\": \"Invalid Coffee\",\r\n\"description\": \"Testing invalid price\",\r\n\"price\": 0,\r\n\"isAvailable\": true\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/menu",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "menu"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create Menu Item - Duplicate SKU",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 409\", function () {\r\npm.response.to.have.status(409);\r\n});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n\"category\": \"Coffee\",\r\n\"sku\": \"C801735\",\r\n\"name\": \"Duplicate Cappuccino\",\r\n\"description\": \"Duplicate test\",\r\n\"price\": 45,\r\n\"isAvailable\": true\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/menu",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "menu"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get Menu Item - Not found",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 404\", function () {\r\npm.response.to.have.status(404);\r\n});\r\n\r\npm.test(\"Error response is returned\", function () {\r\nconst jsonData = pm.response.json();\r\npm.expect(jsonData).to.have.property(\"error\");\r\n});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/menu/item/Coffee/DOESNOTEXIST",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "menu",
+                    "item",
+                    "Coffee",
+                    "DOESNOTEXIST"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Create Menu Item",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const uniqueSku = \"C\" + Date.now().toString().slice(-6);\r\npm.collectionVariables.set(\"testCategory\", \"Coffee\");\r\npm.collectionVariables.set(\"testSku\", uniqueSku);\r\nconsole.log(\"Test Category:\",\r\npm.collectionVariables.get(\"testCategory\"));\r\nconsole.log(\"Test SKU:\", pm.collectionVariables.get(\"testSku\"));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {\r\npm.response.to.have.status(201);\r\n});\r\n\r\npm.test(\"Created menu item contains expected fields\", function () {\r\nconst jsonData = pm.response.json();\r\npm.expect(jsonData).to.have.property(\"Category\");\r\npm.expect(jsonData).to.have.property(\"SKU\");\r\npm.expect(jsonData).to.have.property(\"Name\");\r\npm.expect(jsonData).to.have.property(\"Price\");\r\npm.expect(jsonData).to.have.property(\"IsAvailable\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n\"category\": \"{{testCategory}}\",\r\n\"sku\": \"{{testSku}}\",\r\n\"name\": \"Espresso 6\",\r\n\"description\": \"Espresso 6 with steamed milk\",\r\n\"price\": 45,\r\n\"isAvailable\": true\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/menu",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "menu"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Menu Items",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r\npm.response.to.have.status(200);\r\n});\r\npm.test(\"Response is JSON\", function () {\r\npm.response.to.be.json;\r\n});\r\n\r\npm.test(\"Response is an array\", function () {\r\nconst jsonData = pm.response.json();\r\npm.expect(jsonData).to.be.an(\"array\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/menu",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "menu"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Menu Item",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Menu Item contains identifying fields\", function(){\r\n    const jsonData = pm.response.json();\r\n\r\n    pm.expect(jsonData).to.have.property(\"Category\");\r\n    pm.expect(jsonData).to.have.property(\"SKU\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/menu/item/{{testCategory}}/{{testSku}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "menu",
+                "item",
+                "{{testCategory}}",
+                "{{testSku}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Menu Items By Category",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r\npm.response.to.have.status(200);\r\n});\r\npm.test(\"Response is an array\", function () {\r\nconst jsonData = pm.response.json();\r\npm.expect(jsonData).to.be.an(\"array\");\r\n});\r\npm.test(\"At least one menu item was returned\",\r\nfunction () {\r\nconst jsonData = pm.response.json();\r\npm.expect(jsonData.length).to.be.above(0);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/menu/category/Coffee",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "menu",
+                "category",
+                "Coffee"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Menu Item",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r\npm.response.to.have.status(200);\r\n});\r\npm.test(\"Updated menu item is returned\", function () {\r\nconst jsonData = pm.response.json();\r\npm.expect(jsonData).to.have.property(\"Name\");\r\npm.expect(jsonData).to.have.property(\"Price\");\r\npm.expect(jsonData).to.have.property(\"IsAvailable\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n\"name\": \"Updated Cappuccino\",\r\n\"description\": \"Updated espresso with steamed milk\",\r\n\"price\": 50,\r\n\"isAvailable\": true\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/menu/{{testCategory}}/{{testSku}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "menu",
+                "{{testCategory}}",
+                "{{testSku}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Menu Item",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 204\", function () {\r\npm.response.to.have.status(204);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/menu/{{testCategory}}/{{testSku}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "menu",
+                "{{testCategory}}",
+                "{{testSku}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Staff Documents",
+      "item": [
+        {
+          "name": "Negative Tests",
+          "item": [
+            {
+              "name": "Upload Staff Document - Invalid Extension",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 400\", function () {\r\npm.response.to.have.status(400);\r\n});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "file",
+                      "type": "file",
+                      "src": [
+                        "/C:/Users/emeris/Desktop/INSY-PracA1-Question2-ST10443523.sql"
+                      ]
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/documents/upload",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "documents",
+                    "upload"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Upload Staff Document - MIME Mismatch",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "Test:\r\npm.test(\"Status code is 400\", function () {\r\npm.response.to.have.status(400);\r\n});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "file",
+                      "type": "file",
+                      "src": [
+                        "/C:/Users/emeris/Desktop/ST10443523-CLDV6212-ICETASK2.pdf"
+                      ]
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/documents/upload",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "documents",
+                    "upload"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Download Staff Document - Not Found",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 404\", function () {\r\npm.response.to.have.status(404);\r\n});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/documents/download/FileThatDoesNotExist.pdf",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "documents",
+                    "download",
+                    "FileThatDoesNotExist.pdf"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Upload Staff Documents",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\npm.response.to.have.status(200);\n});\npm.test(\"Uploaded document metadata is returned\", function () {\nconst jsonData = pm.response.json();\npm.expect(jsonData).to.have.property(\"fileName\");\npm.expect(jsonData).to.have.property(\"fileSize\");\npm.expect(jsonData).to.have.property(\"contentType\");\npm.expect(jsonData).to.have.property(\"uploadedOn\");\n});\n// Save the uploaded filename for the next requests\nconst jsonData = pm.response.json();\npm.collectionVariables.set(\"fileName\", jsonData.fileName);\nconsole.log(\"Uploaded fileName saved as:\", jsonData.fileName);\n"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Pre-request: Override the Content-Type of the file part to application/pdf\n// This is handled by setting the contentType on the form-data item\n"
+                ]
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disabledSystemHeaders": {}
+          },
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [
+                    "postman-cloud:///1f1ac362-ad21-4ae0-aa55-f957ee84e9c6"
+                  ]
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/documents/upload",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "documents",
+                "upload"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Staff Documents",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r\npm.response.to.have.status(200);\r\n});\r\npm.test(\"Response is JSON\", function () {\r\npm.response.to.be.json;\r\n});\r\npm.test(\"Response is an array\", function () {\r\nconst jsonData = pm.response.json();\r\npm.expect(jsonData).to.be.an(\"array\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/documents",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "documents"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Download Staff Document",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r\npm.response.to.have.status(200);\r\n});\r\npm.test(\"Content-Type header is present\", function () {\r\npm.expect(pm.response.headers.has(\"Content-Type\")).to.be.true;\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/documents/download/{{fileName}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "documents",
+                "download",
+                "{{fileName}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Staff Document",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r\npm.response.to.have.status(200);\r\n});\r\npm.test(\"Response contains success message\", function () {\r\nconst jsonData = pm.response.json();\r\npm.expect(jsonData).to.have.property(\"message\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/documents/{{fileName}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "documents",
+                "{{fileName}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "testCategory",
+      "value": ""
+    },
+    {
+      "key": "testSku",
+      "value": ""
+    },
+    {
+      "key": "fileName",
+      "value": ""
+    }
+  ]
+}

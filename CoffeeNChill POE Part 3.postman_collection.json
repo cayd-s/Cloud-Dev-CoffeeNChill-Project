@@ -1,0 +1,1352 @@
+{
+  "info": {
+    "_postman_id": "3c238429-52e0-4701-b6d1-d598e1345ee6",
+    "name": "CoffeeNChill POE Part 3",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "57931139",
+    "_collection_link": "https://go.postman.co/collection/57931139-3c238429-52e0-4701-b6d1-d598e1345ee6?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Authentication and accounts",
+      "item": [
+        {
+          "name": "Register Customer (new unique email)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response status is expected for this request', function () {",
+                  "    pm.expect([200, 201, 400, 409]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Response time is under 10 seconds', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "    pm.test('Successful registration response is JSON', function () { pm.response.to.be.json; });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{customerEmail}}\",\n  \"fullName\": \"Postman Test Customer\",\n  \"password\": \"{{testPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Uses a unique email variable. Check actual DTO required fields against Swagger; adapt if your register DTO differs."
+          },
+          "response": []
+        },
+        {
+          "name": "Login Customer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response status is expected for this request', function () {",
+                  "    pm.expect([200, 400, 401]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Response time is under 10 seconds', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    const token = data.accessToken || data.token || data.jwt;",
+                  "    if (token) pm.collectionVariables.set('customerJwt', token);",
+                  "    pm.test('Login response includes a JWT', function () { pm.expect(token, 'JWT field (accessToken/token/jwt)').to.be.a('string').and.not.empty; });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{customerEmail}}\",\n  \"password\": \"{{testPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Successful login should return a JWT. This test stores accessToken or token if present."
+          },
+          "response": []
+        },
+        {
+          "name": "Accept Staff Invitation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response status is expected for this request', function () {",
+                  "    pm.expect([200, 400, 401, 404, 409]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Response time is under 10 seconds', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"invitationId\": \"{{invitationId}}\",\n  \"token\": \"{{invitationToken}}\",\n  \"password\": \"{{staffPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/accept-invitation",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "accept-invitation"
+              ]
+            },
+            "description": "Create an invitation first using an Admin JWT. Copy invitation ID and developmentInvitationToken from the create response into collection variables. Acceptance creates the Staff account; login separately to obtain JWT."
+          },
+          "response": []
+        },
+        {
+          "name": "Login Staff",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response status is expected for this request', function () {",
+                  "    pm.expect([200, 400, 401]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Response time is under 10 seconds', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json(); const token = data.accessToken || data.token || data.jwt;",
+                  "    if (token) pm.collectionVariables.set('staffJwt', token);",
+                  "    pm.test('Login response includes a JWT', function () { pm.expect(token, 'JWT field (accessToken/token/jwt)').to.be.a('string').and.not.empty; });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{staffEmail}}\",\n  \"password\": \"{{staffPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "After accepting invitation, login and save returned JWT."
+          },
+          "response": []
+        },
+        {
+          "name": "Login Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response status is expected for this request', function () {",
+                  "    pm.expect([200, 400, 401]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Response time is under 10 seconds', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json(); const token = data.accessToken || data.token || data.jwt;",
+                  "    if (token) pm.collectionVariables.set('adminJwt', token);",
+                  "    pm.test('Login response includes a JWT', function () { pm.expect(token, 'JWT field (accessToken/token/jwt)').to.be.a('string').and.not.empty; });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Login with the Admin account provisioned locally. Saves the JWT if login succeeds."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Admin staff invitations",
+      "item": [
+        {
+          "name": "Create Staff Invitation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response status is expected for this request', function () {",
+                  "    pm.expect([201, 401, 403, 409]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Response time is under 10 seconds', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "    const d = pm.response.json(); const inv = d.invitation || d;",
+                  "    const id = inv.invitationId || inv.InvitationId || inv.id;",
+                  "    const token = d.developmentInvitationToken;",
+                  "    if (id) pm.collectionVariables.set('invitationId', id);",
+                  "    if (token) pm.collectionVariables.set('invitationToken', token);",
+                  "    pm.test('Invitation ID returned', function () { pm.expect(id, 'invitation ID').to.be.a('string').and.not.empty; });",
+                  "    pm.test('Development invitation token returned when running in Development', function () {",
+                  "        if (pm.environment.get('expectDevelopmentInvitationToken') === 'true') pm.expect(token, 'developmentInvitationToken').to.be.a('string').and.not.empty;",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{staffEmail}}\",\n  \"fullName\": \"Postman Test Staff\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/staff/invitations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "staff",
+                "invitations"
+              ]
+            },
+            "description": "Requires Admin JWT. In Development, response should include developmentInvitationToken; copy it and invitation.invitationId (or invitationId) into variables."
+          },
+          "response": []
+        },
+        {
+          "name": "List Staff Invitations",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response status is expected for this request', function () {",
+                  "    pm.expect([200, 401, 403]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Response time is under 10 seconds', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/staff/invitations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "staff",
+                "invitations"
+              ]
+            },
+            "description": "Requires Admin JWT."
+          },
+          "response": []
+        },
+        {
+          "name": "Revoke Staff Invitation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response status is expected for this request', function () {",
+                  "    pm.expect([200, 401, 403, 409]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Response time is under 10 seconds', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/staff/invitations/{{invitationId}}/revoke",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "staff",
+                "invitations",
+                "{{invitationId}}",
+                "revoke"
+              ]
+            },
+            "description": "Only run for a pending invitation that you do not intend to accept."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Public endpoints and orders",
+      "item": [
+        {
+          "name": "Get Menu (public)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response status is expected for this request', function () {",
+                  "    pm.expect([200, 401, 403, 502]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Response time is under 10 seconds', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/menu",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "menu"
+              ]
+            },
+            "description": "Expected to reach the Azure Functions host; 502 indicates gateway-to-Functions connectivity/configuration issue."
+          },
+          "response": []
+        },
+        {
+          "name": "Queue Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response status is expected for this request', function () {",
+                  "    pm.expect([202, 400, 401, 403, 502]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Response time is under 10 seconds', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"{{orderId}}\",\n  \"customerName\": \"Postman Test Customer\",\n  \"selectedItemSKUs\": [\n    \"{{menuSku}}\"\n  ],\n  \"totalPrice\": 65.0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/queue",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "queue"
+              ]
+            },
+            "description": "Use an existing available menu SKU and its correct price. Replace sample SKU/price before running. Save the returned order ID/date for follow-up queries."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Customer protected routes and authorization",
+      "item": [
+        {
+          "name": "Customer - Get My Account",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response status is expected for this request', function () {",
+                  "    pm.expect([200, 401, 403]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Response time is under 10 seconds', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/account/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "account",
+                "me"
+              ]
+            },
+            "description": "Requires Customer JWT; should return current account details."
+          },
+          "response": []
+        },
+        {
+          "name": "Customer JWT blocked from Admin Dashboard",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response status is expected for this request', function () {",
+                  "    pm.expect([403]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Response time is under 10 seconds', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/dashboard",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "dashboard"
+              ]
+            },
+            "description": "Negative role test: Customer token should be forbidden."
+          },
+          "response": []
+        },
+        {
+          "name": "Customer JWT blocked from Staff Dashboard",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response status is expected for this request', function () {",
+                  "    pm.expect([403]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Response time is under 10 seconds', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/staff/dashboard",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "staff",
+                "dashboard"
+              ]
+            },
+            "description": "Negative role test: Customer token should be forbidden."
+          },
+          "response": []
+        },
+        {
+          "name": "No JWT - Admin Dashboard denied",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response status is expected for this request', function () {",
+                  "    pm.expect([401]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Response time is under 10 seconds', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/dashboard",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "dashboard"
+              ]
+            },
+            "description": "Negative authentication test: protected route without token should return Unauthorized."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Staff and Admin management",
+      "item": [
+        {
+          "name": "List Staff Members (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response status is expected for this request', function () {",
+                  "    pm.expect([200, 401, 403]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Response time is under 10 seconds', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/staff",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "staff"
+              ]
+            },
+            "description": "Admin-only staff listing route; confirm route in Swagger."
+          },
+          "response": []
+        },
+        {
+          "name": "Customer JWT blocked from Staff Management",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response status is expected for this request', function () {",
+                  "    pm.expect([401, 403]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Response time is under 10 seconds', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/staff",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "staff"
+              ]
+            },
+            "description": "Set Authorization manually to Customer JWT for this negative test; request-level bearer currently uses {{jwt}}."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Documents and Azure Functions",
+      "item": [
+        {
+          "name": "List Documents",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response status is expected for this request', function () {",
+                  "    pm.expect([200, 401, 403, 502]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Response time is under 10 seconds', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{staffJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/documents",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "documents"
+              ]
+            },
+            "description": "Protected document listing. Requires a permitted Staff/Admin JWT and working Functions/Storage configuration."
+          },
+          "response": []
+        },
+        {
+          "name": "Download Document (replace ID)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response status is expected for this request', function () {",
+                  "    pm.expect([200, 401, 403, 404, 502]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Response time is under 10 seconds', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{staffJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/documents/{{documentId}}/download",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "documents",
+                "{{documentId}}",
+                "download"
+              ]
+            },
+            "description": "Replace path with exact Swagger route if your controller uses a different download route."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Document (replace ID)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response status is expected for this request', function () {",
+                  "    pm.expect([200, 204, 401, 403, 404, 502]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Response time is under 10 seconds', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{staffJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/documents/{{documentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "documents",
+                "{{documentId}}"
+              ]
+            },
+            "description": "Destructive: only run against a test document."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Messages",
+      "item": [
+        {
+          "name": "Send Message",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response status is expected for this request', function () {",
+                  "    pm.expect([200, 201, 400, 401, 403, 502]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Response time is under 10 seconds', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Postman Part 3 test message\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/message",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "message"
+              ]
+            },
+            "description": "Check the exact DTO fields in Swagger and add any required properties."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Customer Messages",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response status is expected for this request', function () {",
+                  "    pm.expect([200, 401, 403, 502]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Response time is under 10 seconds', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/message/customer",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "message",
+                "customer"
+              ]
+            },
+            "description": "Customer-specific message route; check role restrictions in Swagger."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Staff Messages",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response status is expected for this request', function () {",
+                  "    pm.expect([200, 401, 403, 502]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Response time is under 10 seconds', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{staffJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/message/staff",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "message",
+                "staff"
+              ]
+            },
+            "description": "Staff-specific message route; should reject Customer JWT if role-restricted."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Error and validation tests",
+      "item": [
+        {
+          "name": "Login with invalid credentials",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response status is expected for this request', function () {",
+                  "    pm.expect([400, 401]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Response time is under 10 seconds', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"not-a-real-user@example.com\",\n  \"password\": \"Incorrect-Password-123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Expected invalid-credentials response."
+          },
+          "response": []
+        },
+        {
+          "name": "Invalid order body rejected",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response status is expected for this request', function () {",
+                  "    pm.expect([400, 401, 403]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Response time is under 10 seconds', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerJwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"\",\n  \"customerName\": \"\",\n  \"selectedItemSKUs\": [],\n  \"totalPrice\": -1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/queue",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "queue"
+              ]
+            },
+            "description": "Expected validation failure; if auth is required, use a valid Customer JWT."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwt}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://localhost:7001"
+    },
+    {
+      "key": "jwt",
+      "value": ""
+    },
+    {
+      "key": "customerJwt",
+      "value": ""
+    },
+    {
+      "key": "staffJwt",
+      "value": ""
+    },
+    {
+      "key": "adminJwt",
+      "value": ""
+    },
+    {
+      "key": "customerEmail",
+      "value": "postman.customer@example.com"
+    },
+    {
+      "key": "staffEmail",
+      "value": "postman.staff@example.com"
+    },
+    {
+      "key": "adminEmail",
+      "value": "admin@example.com"
+    },
+    {
+      "key": "testPassword",
+      "value": "Postman-Test-Password-123!"
+    },
+    {
+      "key": "staffPassword",
+      "value": "Postman-Staff-Password-123!"
+    },
+    {
+      "key": "adminPassword",
+      "value": "REPLACE_WITH_PROVISIONED_ADMIN_PASSWORD"
+    },
+    {
+      "key": "invitationId",
+      "value": "REPLACE_AFTER_CREATE_INVITATION"
+    },
+    {
+      "key": "invitationToken",
+      "value": "REPLACE_AFTER_CREATE_INVITATION"
+    },
+    {
+      "key": "expectDevelopmentInvitationToken",
+      "value": "true"
+    },
+    {
+      "key": "orderId",
+      "value": "ORD-POSTMAN-TEST-001"
+    },
+    {
+      "key": "menuSku",
+      "value": "REPLACE_WITH_EXISTING_MENU_SKU"
+    },
+    {
+      "key": "documentId",
+      "value": "REPLACE_WITH_TEST_DOCUMENT_ID"
+    }
+  ]
+}

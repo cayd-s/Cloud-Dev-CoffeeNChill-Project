@@ -1,0 +1,30 @@
+# Visual studio files
+.vs/
+.vscode/
+
+# Build output
+bin/
+obj/
+
+# Git
+.git/
+.gitignore
+
+# User-specified
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+#Test results 
+TestResults/
+
+# Local Azure Functions settings
+local.settings.json
+
+# Debug files
+*.log
+
+# Operating system files
+.DS_Store
+Thumbs.db
